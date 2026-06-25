@@ -1,14 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Menu, X, Moon, Sun, Linkedin } from 'lucide-react';
+import { useI18n } from '../locales';
+import { handleLinkedInClick } from '../utils/linkedin';
 
-const NAV_LINKS = [
-  { label: 'About', href: '#about' },
-  { label: 'Skills', href: '#skills' },
-  { label: 'Experience', href: '#experience' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Education', href: '#education' },
-  { label: 'Contact', href: '#contact' },
-];
+
 
 interface NavbarProps {
   darkMode: boolean;
@@ -19,12 +14,22 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
+  const { language, changeLanguage, t } = useI18n();
+
+  const navLinksTranslated = [
+    { label: t('common.about'), href: '#about' },
+    { label: t('common.skills'), href: '#skills' },
+    { label: t('common.experience'), href: '#experience' },
+    { label: t('common.projects'), href: '#projects' },
+    { label: t('common.education'), href: '#education' },
+    { label: t('common.contact'), href: '#contact' },
+  ];
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
 
-      const sections = NAV_LINKS.map((l) => l.href.slice(1));
+      const sections = ['about', 'skills', 'experience', 'projects', 'education', 'contact'];
       for (const id of [...sections].reverse()) {
         const el = document.getElementById(id);
         if (el && window.scrollY >= el.offsetTop - 120) {
@@ -76,17 +81,16 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
             </button>
             <a
               href="https://www.linkedin.com/public-profile/settings/?trk=d_flagship3_profile_self_view_public_profile&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3Bjuek2v8FTM631TBlBI1C8A%3D%3D"
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={handleLinkedInClick}
               className="text-surface-400 hover:text-[#0a66c2] dark:hover:text-[#0a66c2] transition-colors ml-1 flex items-center justify-center p-1 rounded-md hover:bg-slate-100 dark:hover:bg-white/[0.05]"
-              title="LinkedIn Profile"
+              title={t('common.linkedinTitle')}
             >
               <Linkedin size={16} />
             </a>
           </div>
 
           <div className="hidden md:flex items-center gap-6">
-            {NAV_LINKS.map((link) => (
+            {navLinksTranslated.map((link) => (
               <button
                 key={link.href}
                 onClick={() => handleNavClick(link.href)}
@@ -98,6 +102,21 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Language Switcher */}
+            <div className="relative flex items-center">
+              <select
+                value={language}
+                onChange={(e) => changeLanguage(e.target.value as any)}
+                className="appearance-none bg-transparent hover:bg-surface-100 dark:hover:bg-surface-800 text-surface-700 dark:text-surface-300 text-xs font-mono font-bold pl-2.5 pr-5 py-1.5 rounded-lg border border-surface-200 dark:border-surface-700/60 focus:outline-none focus:ring-1 focus:ring-primary-500 cursor-pointer select-none transition-colors duration-200"
+                aria-label="Change language"
+              >
+                <option value="en" className="bg-white dark:bg-surface-900">EN</option>
+                <option value="bn" className="bg-white dark:bg-surface-900">BN</option>
+                <option value="hi" className="bg-white dark:bg-surface-900">HI</option>
+              </select>
+              <span className="absolute right-2 pointer-events-none text-[8px] text-surface-400 font-mono">▼</span>
+            </div>
+
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-lg text-surface-500 hover:text-surface-900 dark:hover:text-white hover:bg-surface-100 dark:hover:bg-surface-800 transition-all duration-200"
@@ -110,7 +129,7 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
               onClick={() => handleNavClick('#contact')}
               className="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-950/40 transition-all duration-200"
             >
-              Request Resume
+              {t('common.requestResume')}
             </button>
 
             <button
@@ -127,7 +146,7 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
       {mobileOpen && (
         <div className="md:hidden bg-white dark:bg-surface-900 border-t border-surface-200 dark:border-surface-700 shadow-lg">
           <div className="section-container py-4 flex flex-col gap-1">
-            {NAV_LINKS.map((link) => (
+            {navLinksTranslated.map((link) => (
               <button
                 key={link.href}
                 onClick={() => handleNavClick(link.href)}
@@ -145,7 +164,7 @@ export default function Navbar({ darkMode, toggleDarkMode }: NavbarProps) {
                 onClick={() => handleNavClick('#contact')}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-primary-600 dark:text-primary-400 border border-primary-200 dark:border-primary-800 hover:bg-primary-50 dark:hover:bg-primary-950/40 transition-all duration-200"
               >
-                Request Resume
+                {t('common.requestResume')}
               </button>
             </div>
           </div>

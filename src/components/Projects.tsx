@@ -1,80 +1,6 @@
 import { useInView } from '../hooks/useInView';
 import { ExternalLink, TrendingUp } from 'lucide-react';
-
-const PROJECTS = [
-  {
-    title: 'Abdoun Real Estate Platform',
-    description: 'Multi-role property listing and search platform (User, Owner, Agent, Admin) featuring Next.js and React, delivering SSR-optimized listing pages for improved Core Web Vitals.',
-    tech: ['Next.js v16', 'React v19', 'FastAPI', 'PostgreSQL v16', 'AWS S3/Cognito'],
-    metrics: [
-      { label: 'Faster page loads', value: '40%' },
-      { label: 'SEO traffic growth', value: '3x' },
-      { label: 'Properties indexed', value: '10K+' },
-    ],
-    category: 'Real Estate',
-    accent: 'blue',
-  },
-  {
-    title: 'SellPoint Analytics Dashboard',
-    description: 'Real-time analytics dashboards and KPI tracking platform. Reduced feature delivery cycles by ~25% using shared component libraries and established code review guidelines.',
-    tech: ['React.js v17-v18', 'TypeScript', 'Redux Toolkit', 'D3.js', 'REST APIs'],
-    metrics: [
-      { label: 'Delivery speedup', value: '25%' },
-      { label: 'Reusable modules', value: '8+' },
-      { label: 'Visualized data', value: '1M+' },
-    ],
-    category: 'SaaS / Analytics',
-    accent: 'green',
-  },
-  {
-    title: 'Nucleus Case Management',
-    description: 'Enterprise case management platform featuring Angular microservices with Keycloak OAuth2/OIDC security. Introduced OnPush change detection and standalone component patterns.',
-    tech: ['Angular v14-v17', 'NgRx', 'Spring Boot v3.x', 'PostgreSQL v15', 'Keycloak'],
-    metrics: [
-      { label: 'Bundle reduction', value: '-35%' },
-      { label: 'Active users', value: '500+' },
-      { label: 'Uptime SLA', value: '99.9%' },
-    ],
-    category: 'Enterprise / Legal',
-    accent: 'orange',
-  },
-  {
-    title: 'SenoClock Digital Health Platform',
-    description: 'Cross-platform mobile application built using React Ionic, delivering a consistent iOS and Android UX. Achieved strict WCAG 2.2 AA digital accessibility compliance.',
-    tech: ['React Ionic v6-v7', 'TypeScript', 'Tailwind CSS v3', 'PostgreSQL v14', 'AWS'],
-    metrics: [
-      { label: 'Accessibility level', value: 'AA 2.2' },
-      { label: 'Crash-free rate', value: '98%' },
-      { label: 'Onboarding time', value: '-70%' },
-    ],
-    category: 'Healthcare / Mobile',
-    accent: 'teal',
-  },
-  {
-    title: 'Pet Health & Veterinary Care Platform',
-    description: 'Smart pet healthcare management platform with appointment scheduling and treatment tracking. Achieved robust component coverage using React Testing Library and Jest v29.',
-    tech: ['React v18', 'TypeScript v5', 'Vite v5-v6', 'Redux Toolkit v2', 'Jest / RTL'],
-    metrics: [
-      { label: 'Jest Test Coverage', value: '92%' },
-      { label: 'Lighthouse Score', value: '95+' },
-      { label: 'AI accuracy rate', value: '89%' },
-    ],
-    category: 'Veterinary Care',
-    accent: 'rose',
-  },
-  {
-    title: 'Molcom & Wisebaron Wealth Portals',
-    description: 'Client-facing wealth dashboards and portfolio management onboarding UIs. Enforced sprint delivery and frontend code review practices across the team.',
-    tech: ['Angular v10-v14', 'Angular Material', 'Bootstrap v5', 'Spring Boot v2.x', 'MySQL v8.0'],
-    metrics: [
-      { label: 'Accessibility level', value: 'AA 2.2' },
-      { label: 'AUM tracked', value: '$2B+' },
-      { label: 'Client retention', value: '97%' },
-    ],
-    category: 'Fintech',
-    accent: 'amber',
-  },
-];
+import { useI18n } from '../locales';
 
 const ACCENT_CLASSES: Record<string, { badge: string; metric: string; border: string }> = {
   blue: {
@@ -110,7 +36,89 @@ const ACCENT_CLASSES: Record<string, { badge: string; metric: string; border: st
 };
 
 export default function Projects() {
+  const { t } = useI18n();
   const headingRef = useInView({ threshold: 0.1 });
+
+  const projects = [
+    {
+      title: t('projects.projectList6.abdoun.title'),
+      description: t('projects.projectList6.abdoun.description'),
+      tech: ['Next.js v16', 'React v19', 'FastAPI', 'PostgreSQL v16', 'AWS S3/Cognito'],
+      metrics: [
+        { label: t('projects.projectList6.abdoun.metrics.0.label'), value: t('projects.projectList6.abdoun.metrics.0.value') },
+        { label: t('projects.projectList6.abdoun.metrics.1.label'), value: t('projects.projectList6.abdoun.metrics.1.value') },
+        { label: t('projects.projectList6.abdoun.metrics.2.label'), value: t('projects.projectList6.abdoun.metrics.2.value') },
+      ],
+      category: t('projects.projectList6.abdoun.category'),
+      accent: 'blue',
+    },
+    {
+      title: t('projects.projectList6.sellpoint.title'),
+      description: t('projects.projectList6.sellpoint.description'),
+      tech: ['React.js v17-v18', 'TypeScript', 'Redux Toolkit', 'D3.js', 'REST APIs'],
+      metrics: [
+        { label: t('projects.projectList6.sellpoint.metrics.0.label'), value: t('projects.projectList6.sellpoint.metrics.0.value') },
+        { label: t('projects.projectList6.sellpoint.metrics.1.label'), value: t('projects.projectList6.sellpoint.metrics.1.value') },
+        { label: t('projects.projectList6.sellpoint.metrics.2.label'), value: t('projects.projectList6.sellpoint.metrics.2.value') },
+      ],
+      category: t('projects.projectList6.sellpoint.category'),
+      accent: 'green',
+    },
+    {
+      title: t('projects.projectList6.nucleus.title'),
+      description: t('projects.projectList6.nucleus.description'),
+      tech: ['Angular v14-v17', 'NgRx', 'Spring Boot v3.x', 'PostgreSQL v15', 'Keycloak'],
+      metrics: [
+        { label: t('projects.projectList6.nucleus.metrics.0.label'), value: t('projects.projectList6.nucleus.metrics.0.value') },
+        { label: t('projects.projectList6.nucleus.metrics.1.label'), value: t('projects.projectList6.nucleus.metrics.1.value') },
+        { label: t('projects.projectList6.nucleus.metrics.2.label'), value: t('projects.projectList6.nucleus.metrics.2.value') },
+      ],
+      category: t('projects.projectList6.nucleus.category'),
+      accent: 'orange',
+    },
+    {
+      title: t('projects.projectList6.senoclock.title'),
+      description: t('projects.projectList6.senoclock.description'),
+      tech: ['React Ionic v6-v7', 'TypeScript', 'Tailwind CSS v3', 'PostgreSQL v14', 'AWS'],
+      metrics: [
+        { label: t('projects.projectList6.senoclock.metrics.0.label'), value: t('projects.projectList6.senoclock.metrics.0.value') },
+        { label: t('projects.projectList6.senoclock.metrics.1.label'), value: t('projects.projectList6.senoclock.metrics.1.value') },
+        { label: t('projects.projectList6.senoclock.metrics.2.label'), value: t('projects.projectList6.senoclock.metrics.2.value') },
+      ],
+      category: t('projects.projectList6.senoclock.category'),
+      accent: 'teal',
+    },
+    {
+      title: t('projects.projectList6.pethealth.title'),
+      description: t('projects.projectList6.pethealth.description'),
+      tech: ['React v18', 'TypeScript v5', 'Vite v5-v6', 'Redux Toolkit v2', 'Jest / RTL'],
+      metrics: [
+        { label: t('projects.projectList6.pethealth.metrics.0.label'), value: t('projects.projectList6.pethealth.metrics.0.value') },
+        { label: t('projects.projectList6.pethealth.metrics.1.label'), value: t('projects.projectList6.pethealth.metrics.1.value') },
+        { label: t('projects.projectList6.pethealth.metrics.2.label'), value: t('projects.projectList6.pethealth.metrics.2.value') },
+      ],
+      category: t('projects.projectList6.pethealth.category'),
+      accent: 'rose',
+    },
+    {
+      title: t('projects.projectList6.molcom.title'),
+      description: t('projects.projectList6.molcom.description'),
+      tech: ['Angular v10-v14', 'Angular Material', 'Bootstrap v5', 'Spring Boot v2.x', 'MySQL v8.0'],
+      metrics: [
+        { label: t('projects.projectList6.molcom.metrics.0.label'), value: t('projects.projectList6.molcom.metrics.0.value') },
+        { label: t('projects.projectList6.molcom.metrics.1.label'), value: t('projects.projectList6.molcom.metrics.1.value') },
+        { label: t('projects.projectList6.molcom.metrics.2.label'), value: t('projects.projectList6.molcom.metrics.2.value') },
+      ],
+      category: t('projects.projectList6.molcom.category'),
+      accent: 'amber',
+    },
+  ];
+
+  const impactSummary = [
+    { icon: TrendingUp, value: '40–60%', label: t('projects.avgPerformance'), color: 'text-primary-600 dark:text-primary-400' },
+    { icon: TrendingUp, value: t('projects.domainsCount'), label: t('projects.domainsDesc'), color: 'text-accent-600 dark:text-accent-400' },
+    { icon: TrendingUp, value: t('projects.shipsCount'), label: t('projects.shipsDesc'), color: 'text-orange-600 dark:text-orange-400' },
+  ];
 
   return (
     <section id="projects" className="py-24 bg-surface-50 dark:bg-surface-950">
@@ -120,18 +128,18 @@ export default function Projects() {
           className="opacity-0 [&.in-view]:animate-fade-up mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900 text-primary-600 dark:text-primary-400 text-xs font-semibold uppercase tracking-widest mb-4">
-            Portfolio
+            {t('projects.sectionTitle')}
           </div>
           <h2 className="section-heading text-surface-900 dark:text-white">
-            Featured Projects
+            {t('projects.heading')}
           </h2>
           <p className="section-subheading">
-            Real-world enterprise applications shipped across multiple industries
+            {t('projects.subtitle')}
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {PROJECTS.map((project, i) => {
+          {projects.map((project, i) => {
             const cardRef = useInView({ threshold: 0.05 });
             const accentClasses = ACCENT_CLASSES[project.accent];
             return (
@@ -171,7 +179,7 @@ export default function Projects() {
                   {/* Tech stack */}
                   <div className="flex flex-wrap gap-1.5">
                     {project.tech.map((t) => (
-                      <span key={t} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300 border border-surface-200 dark:border-surface-600">
+                      <span key={t} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-100 dark:bg-surface-700 text-surface-600 dark:text-surface-300 border border-surface-200 dark:border-surface-600 font-mono">
                         {t}
                       </span>
                     ))}
@@ -184,11 +192,7 @@ export default function Projects() {
 
         {/* Impact summary */}
         <div className="mt-14 grid sm:grid-cols-3 gap-5">
-          {[
-            { icon: TrendingUp, value: '40–60%', label: 'Average performance improvement across projects', color: 'text-primary-600 dark:text-primary-400' },
-            { icon: TrendingUp, value: '6 Domains', label: 'Healthcare, Fintech, Real Estate, Legal, SaaS, AI', color: 'text-accent-600 dark:text-accent-400' },
-            { icon: TrendingUp, value: '20+ Ships', label: 'Features and full products delivered end-to-end', color: 'text-orange-600 dark:text-orange-400' },
-          ].map((item) => {
+          {impactSummary.map((item) => {
             const ref = useInView({ threshold: 0.1 });
             return (
               <div

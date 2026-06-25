@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { 
   ArrowRight, 
   Mail, 
@@ -9,6 +9,7 @@ import {
   Check, 
   RotateCcw 
 } from 'lucide-react';
+import { useI18n } from '../locales';
 
 // Theme configuration presets
 interface ThemePreset {
@@ -85,41 +86,6 @@ const TECH_PILLS = [
   { label: 'AWS', short: 'AW' },
   { label: 'OpenAI', short: 'AI' },
 ];
-
-const COMMAND_MAP: Record<string, string[]> = {
-  help: [
-    'Available commands:',
-    '  skills    - View key technical skills summary',
-    '  projects  - Show active developer projects',
-    '  stats     - Print core production stats & metrics',
-    '  clear     - Clear terminal logs',
-  ],
-  skills: [
-    'Technical Skills:',
-    '  • Languages: JavaScript, TypeScript, Python, HTML/CSS',
-    '  • Frameworks: React, Next.js, Angular, Ionic',
-    '  • State Management: Redux Toolkit, Context API, NgRx',
-    '  • Styling: Tailwind CSS, Material UI / MUI, Styled Components',
-    '  • Backend & Cloud: FastAPI, Node.js, Spring Boot, Keycloak, AWS',
-    '  • Testing & DevOps: Jest, React Testing Library, Cypress, Docker, CI/CD',
-  ],
-  projects: [
-    'Shipped Enterprise Projects:',
-    '  • Abdoun (Real Estate): SSR listing platform (Next.js, FastAPI, AWS)',
-    '  • SellPoint (SaaS): Real-time analytics dashboards (React, Redux, D3)',
-    '  • Nucleus (Case Management): Enterprise microservices (Angular, NgRx, Spring Boot)',
-    '  • SenoClock (Healthcare): Cross-platform mobile app (Ionic, React, AWS)',
-    '  • Pet Health (Veterinary): Appointment & triage system (React, Vite, Jest)',
-    '  • Wealth Portals (Fintech): Advisor & portfolio views (Angular, Spring Boot)',
-  ],
-  stats: [
-    'Production Telemetry:',
-    '  • Experience: 7 Years of enterprise software delivery',
-    '  • Core Frameworks: React (v16-v19), Next.js (v12-v16), Angular (v10-v19)',
-    '  • Domains: Healthcare, Real Estate, Fintech, Legal, Case Management',
-    '  • Standards Compliance: WCAG 2.2 AA Accessibility & Inclusive Design',
-  ],
-};
 
 // Canvas Particle Animation
 function CanvasParticles({ themeColor, speed = 1 }: { themeColor: string; speed: number }) {
@@ -256,6 +222,7 @@ function CanvasParticles({ themeColor, speed = 1 }: { themeColor: string; speed:
 }
 
 export default function Hero() {
+  const { language, t } = useI18n();
   const [visible, setVisible] = useState(false);
   const [activeTheme, setActiveTheme] = useState<ThemePreset>(THEME_PRESETS.sky);
   const [activeTab, setActiveTab] = useState<'profile' | 'terminal' | 'sandbox'>('profile');
@@ -270,9 +237,17 @@ export default function Hero() {
   const [terminalInput, setTerminalInput] = useState<string>('');
   const terminalEndRef = useRef<HTMLDivElement>(null);
 
+  // Sync initial welcome logs on language change
   useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 50);
-    return () => clearTimeout(t);
+    setTerminalHistory([
+      t('hero.commands.help')[0] || 'Type "help" or click one of the quick commands below.',
+      'System connected to D:\\My_Workspace\\arindam-website...'
+    ]);
+  }, [language, t]);
+
+  useEffect(() => {
+    const tOut = setTimeout(() => setVisible(true), 50);
+    return () => clearTimeout(tOut);
   }, []);
 
   // Scroll terminal to bottom
@@ -281,6 +256,22 @@ export default function Hero() {
       terminalEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [terminalHistory, activeTab]);
+
+  const commandMapTranslated = useMemo<Record<string, string[]>>(() => ({
+    help: t('hero.helpOutput') ? [t('hero.helpOutput')] : [
+      'Available commands:',
+      '  skills    - View key technical skills summary',
+      '  projects  - Show active developer projects',
+      '  stats     - Print core production stats & metrics',
+      '  clear     - Clear terminal logs',
+    ],
+    about: [
+      t('hero.aboutOutput') || 'Arindam Betal — Senior Frontend Developer with 7 years of production experience...'
+    ],
+    skills: (t('hero.skillsOutput') || '').split('\n'),
+    projects: (t('hero.projectsOutput') || '').split('\n'),
+    stats: (t('hero.statsOutput') || '').split('\n')
+  }), [language, t]);
 
   const runCommand = useCallback((cmdRaw: string) => {
     const cmd = cmdRaw.trim().toLowerCase();
@@ -291,10 +282,11 @@ export default function Hero() {
       setTerminalHistory([]);
       setTerminalInput('');
       return;
-    } else if (COMMAND_MAP[cmd]) {
-      response = COMMAND_MAP[cmd];
+    } else if (commandMapTranslated[cmd]) {
+      response = commandMapTranslated[cmd];
     } else {
-      response = [`Command not found: "${cmdRaw}". Type "help" for a list of commands.`];
+      const errorMsg = t('hero.unknownCommand') || 'Command not found: "{cmd}". Type "help" for available directives.';
+      response = [errorMsg.replace('{cmd}', cmdRaw)];
     }
 
     setTerminalHistory((prev) => [
@@ -304,7 +296,7 @@ export default function Hero() {
       ''
     ]);
     setTerminalInput('');
-  }, []);
+  }, [commandMapTranslated, t]);
 
   const handleTerminalSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -332,10 +324,10 @@ export default function Hero() {
     { text: ' "Arindam Betal"', type: 'string' },
     { text: ',', type: 'plain' },
     { text: '  role:', type: 'key' },
-    { text: ' "Senior Frontend Developer"', type: 'string' },
+    { text: ` "${t('hero.badge')}"`, type: 'string' },
     { text: ',', type: 'plain' },
     { text: '  experience:', type: 'key' },
-    { text: ' "7 Years"', type: 'string' },
+    { text: ` "${t('hero.experienceBadge')}"`, type: 'string' },
     { text: ',', type: 'plain' },
     { text: '  domains:', type: 'key' },
     { text: ' ["Fintech", "Healthcare", "SaaS"]', type: 'string' },
@@ -406,7 +398,7 @@ export default function Hero() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
                 <span className="text-[10px] font-bold tracking-[0.16em] uppercase text-emerald-400">
-                  Open for new opportunities
+                  {t('hero.openForOpportunities')}
                 </span>
               </div>
             </div>
@@ -434,15 +426,15 @@ export default function Hero() {
             >
               <div className="flex flex-wrap items-center gap-2 mt-2 mb-6">
                 <span className={`px-3.5 py-1.5 rounded-xl ${activeTheme.badgeBg} border ${activeTheme.badgeBorder} ${activeTheme.badgeText} text-xs font-semibold backdrop-blur-md`}>
-                  Senior Frontend Developer
+                  {t('hero.badge')}
                 </span>
                 <span className="text-white/20 text-xs select-none">•</span>
                 <span className="px-3.5 py-1.5 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 text-xs font-semibold backdrop-blur-md">
-                  7 Years Exp
+                  {t('hero.experienceBadge')}
                 </span>
                 <span className="text-white/20 text-xs select-none">•</span>
                 <span className="px-3.5 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold backdrop-blur-md">
-                  Enterprise scale
+                  {t('hero.enterpriseScale')}
                 </span>
               </div>
             </div>
@@ -453,7 +445,7 @@ export default function Hero() {
               style={{ transitionDelay: '360ms' }}
             >
               <p className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-lg mb-8">
-                Delivering high-performance, accessible, and scalable web and mobile applications across Healthcare, Real Estate, Fintech, Case Management, and Veterinary Care domains.
+                {t('hero.subtitle')}
               </p>
             </div>
 
@@ -467,7 +459,7 @@ export default function Hero() {
                   onClick={() => scrollTo('projects')}
                   className={`group relative inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-slate-950 font-bold text-sm transition-all duration-300 hover:-translate-y-0.5 ${activeTheme.buttonBg}`}
                 >
-                  Explore Work
+                  {t('hero.exploreWork')}
                   <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform duration-200" />
                 </button>
                 <button
@@ -475,14 +467,14 @@ export default function Hero() {
                   className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/10 hover:border-white/25 text-white/95 font-bold text-sm bg-white/[0.02] hover:bg-white/[0.05] transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <Mail size={15} />
-                  Let's Talk
+                  {t('hero.letsTalk')}
                 </button>
                 <button
                   onClick={() => scrollTo('contact')}
                   className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-white transition-colors duration-200 font-semibold ml-2"
                 >
                   <Mail size={14} />
-                  Request Resume
+                  {t('common.requestResume')}
                 </button>
               </div>
             </div>
@@ -588,7 +580,7 @@ export default function Hero() {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="p-6 h-[260px] overflow-y-auto font-mono text-xs sm:text-sm leading-relaxed scrollbar-thin">
+                <div className="p-6 h-[260px] overflow-y-auto overflow-x-auto max-w-full font-mono text-xs sm:text-sm leading-relaxed scrollbar-thin">
                   
                   {/* Tab 1: Profile View */}
                   {activeTab === 'profile' && (
@@ -642,11 +634,11 @@ export default function Hero() {
                           type="text"
                           value={terminalInput}
                           onChange={(e) => setTerminalInput(e.target.value)}
-                          placeholder="type help, skills, projects, stats..."
+                          placeholder={t('hero.terminalPlaceholder') || "type help, skills, projects, stats..."}
                           className="bg-transparent text-white outline-none border-none flex-1 text-xs sm:text-sm font-mono placeholder:text-slate-600"
                         />
                         <button type="submit" className="text-[10px] text-slate-500 hover:text-white px-2 py-1 rounded bg-white/[0.04] border border-white/[0.08]">
-                          run
+                          {t('hero.run') || 'run'}
                         </button>
                       </form>
                     </div>
@@ -659,21 +651,21 @@ export default function Hero() {
                       <div>
                         <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-bold flex items-center gap-1.5">
                           <Sparkles size={11} className="text-amber-400" />
-                          Color Palette presets
+                          {t('hero.colorPalette')}
                         </div>
                         <div className="grid grid-cols-2 gap-2">
-                          {Object.values(THEME_PRESETS).map((t) => (
+                          {Object.values(THEME_PRESETS).map((tPreset) => (
                             <button
-                              key={t.id}
-                              onClick={() => setActiveTheme(t)}
+                              key={tPreset.id}
+                              onClick={() => setActiveTheme(tPreset)}
                               className={`flex items-center justify-between px-3 py-2 rounded-xl text-left border text-xs font-semibold transition-all duration-200 ${
-                                activeTheme.id === t.id
+                                activeTheme.id === tPreset.id
                                   ? 'bg-white/[0.08] border-white/20 text-white shadow-lg'
                                   : 'bg-white/[0.02] border-white/[0.04] text-slate-400 hover:bg-white/[0.05] hover:border-white/10 hover:text-slate-200'
                               }`}
                             >
-                              <span>{t.name}</span>
-                              {activeTheme.id === t.id && <Check size={12} className="text-emerald-400" />}
+                              <span>{tPreset.name}</span>
+                              {activeTheme.id === tPreset.id && <Check size={12} className="text-emerald-400" />}
                             </button>
                           ))}
                         </div>
@@ -682,13 +674,18 @@ export default function Hero() {
                       {/* Particle speed slider */}
                       <div>
                         <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-bold flex items-center justify-between">
-                          <span>Particle Velocity: {particleSpeed === 0 ? 'Paused' : particleSpeed < 1 ? 'Slow' : particleSpeed < 2 ? 'Normal' : 'Fast'}</span>
+                          <span>
+                            {(t('hero.particleVelocity') || 'Particle Velocity: {speed}').replace(
+                              '{speed}',
+                              particleSpeed === 0 ? 'Paused' : particleSpeed < 1 ? 'Slow' : particleSpeed < 2 ? 'Normal' : 'Fast'
+                            )}
+                          </span>
                           <button 
                             onClick={() => setParticleSpeed(1.2)} 
                             className="hover:text-white text-slate-600 flex items-center gap-1"
                             title="Reset Speed"
                           >
-                            <RotateCcw size={10} /> Reset
+                            <RotateCcw size={10} /> {t('hero.reset')}
                           </button>
                         </div>
                         <input
@@ -704,7 +701,7 @@ export default function Hero() {
 
                       {/* Radial glows toggle */}
                       <div className="flex items-center justify-between pt-1">
-                        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Ambient Glow Effects</span>
+                        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">{t('hero.ambientGlow')}</span>
                         <button
                           onClick={() => setGlowIntensity(!glowIntensity)}
                           className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
@@ -726,7 +723,7 @@ export default function Hero() {
                 {/* Dashboard bottom shell info */}
                 {activeTab === 'terminal' && (
                   <div className="flex items-center gap-2 px-5 py-2.5 bg-slate-950/40 border-t border-white/[0.05] select-none text-[10px] text-slate-500">
-                    <span className="text-slate-600 font-bold uppercase shrink-0">Try clicking:</span>
+                    <span className="text-slate-600 font-bold uppercase shrink-0">{t('hero.tryClicking')}</span>
                     <div className="flex flex-wrap gap-1.5">
                       {['help', 'skills', 'projects', 'stats'].map((cmd) => (
                         <button
@@ -758,13 +755,13 @@ export default function Hero() {
                 onClick={() => selectMetric('stats')}
                 className="absolute -top-3.5 -right-3 px-3.5 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/25 hover:border-indigo-500/50 text-indigo-400 text-[10px] font-bold backdrop-blur-md shadow-lg transition-all hover:scale-105"
               >
-                7 YRS
+                {t('hero.experienceBadge')}
               </button>
               <button
                 onClick={() => selectMetric('projects')}
                 className="absolute -bottom-3.5 -left-3 px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 hover:border-emerald-500/50 text-emerald-400 text-[10px] font-bold backdrop-blur-md shadow-lg transition-all hover:scale-105"
               >
-                20+ PROJ
+                20+ {t('common.projects').toUpperCase()}
               </button>
             </div>
           </div>
@@ -777,8 +774,8 @@ export default function Hero() {
           style={{ transitionDelay: '700ms' }}
         >
           {[
-            { value: '7', label: 'Years', sub: 'Production', cmd: 'stats' },
-            { value: '20+', label: 'Projects', sub: 'Shipped', cmd: 'projects' },
+            { value: '7', label: t('hero.statsExperience'), sub: t('hero.aboutCommand'), cmd: 'stats' },
+            { value: '20+', label: t('common.projects'), sub: 'Shipped', cmd: 'projects' },
             { value: '4', label: 'Domains', sub: 'Fintech · Health · SaaS', cmd: 'help' },
             { value: '100%', label: 'Satisfaction', sub: 'Client Retention', cmd: 'stats' },
           ].map((stat, idx) => (

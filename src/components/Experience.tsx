@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInView } from '../hooks/useInView';
 import { Calendar, MapPin, ChevronRight, Briefcase } from 'lucide-react';
+import { useI18n } from '../locales';
 
 interface RoleHighlight {
   title: string;
@@ -10,126 +11,138 @@ interface RoleHighlight {
   radarPoints: string; // Polygon points for SVG radar chart
 }
 
-const DEPLOYMENT_ROLES: RoleHighlight[] = [
-  {
-    title: 'Technical Lead',
-    period: '2023 — Present',
-    highlights: [
-      'Architected multi-role real estate platform (Abdoun) using Next.js v16 and React v19, delivering SSR-optimized pages for improved Core Web Vitals and organic search.',
-      'Implemented role-based access control (RBAC) with AWS Cognito authentication and OTP verification, securing multi-tenant context.',
-      'Built FastAPI REST endpoints and PostgreSQL v16 schemas for property listing, lead workflows, and S3 secure storage.',
-      'Delivered property approval workflows and live analytics dashboards, providing Admins and Agents with operational visibility.',
-      'Mentored 4+ developers, established frontend architecture, and integrated AI features via OpenAI API in production.'
-    ],
-    stats: [
-      { label: 'Latency reduced', value: '40%' },
-      { label: 'Engineers Mentored', value: '4+' },
-      { label: 'Build Success', value: '99.9%' }
-    ],
-    radarPoints: '100,25 172,48 152,145 42,145 32,48'
-  },
-  {
-    title: 'Senior Frontend Developer',
-    period: '2021 — 2023',
-    highlights: [
-      'Designed and delivered 8+ reusable React component modules for SellPoint analytics, reducing feature delivery cycles by ~25%.',
-      'Introduced OnPush change detection and standalone component patterns in Angular case management (Nucleus) to cut initial bundle size by 35%.',
-      'Developed responsive Ionic mobile applications for SenoClock digital health, ensuring consistent cross-platform iOS/Android UX.',
-      'Achieved WCAG 2.2 AA accessibility compliance across all patient-facing flows to meet healthcare requirements.',
-      'Integrated frontend with AWS-hosted reporting services, enabling real-time updates and offline-tolerant interactions.'
-    ],
-    stats: [
-      { label: 'Bundle size reduction', value: '-35%' },
-      { label: 'Test coverage', value: '92%' },
-      { label: 'Crash-free sessions', value: '98%' }
-    ],
-    radarPoints: '100,36 140,70 145,138 38,149 24,40'
-  },
-  {
-    title: 'Frontend Developer',
-    period: '2019 — 2021',
-    highlights: [
-      'Served as primary frontend liaison for wealth management stakeholder discussions, translating requirements into Angular-based onboarding UIs.',
-      'Designed complex reporting views and portfolio components, enabling managers to manage client accounts at scale.',
-      'Enforced frontend code review practices and sprint delivery discipline, improving release predictability.',
-      'Partnered with Business Analysts to convert ambiguous stakeholder requirements into precise UI specifications and component libraries.'
-    ],
-    stats: [
-      { label: 'Feature cycle reduction', value: '-25%' },
-      { label: 'AUM Portals built', value: '3+' },
-      { label: 'UX Fidelity rate', value: '98%' }
-    ],
-    radarPoints: '100,50 119,94 136,126 40,144 24,76'
-  }
-];
-
-const PROJECTS = [
-  {
-    name: 'Abdoun',
-    domain: 'Real Estate Management Platform (B2B & B2C)',
-    tech: ['Next.js v16', 'React v19', 'FastAPI', 'PostgreSQL v16', 'AWS S3/Cognito'],
-    bullets: [
-      'Architected multi-role platform using Next.js v16 and React v19, delivering SSR-optimized listing pages.',
-      'Implemented role-based access control (RBAC) with AWS Cognito and OTP verification.',
-      'Contributed full-stack FastAPI REST endpoints and PostgreSQL schemas for property listing.'
-    ],
-  },
-  {
-    name: 'SellPoint',
-    domain: 'Business Performance & Analytics Platform',
-    tech: ['React.js v17-v18', 'TypeScript', 'Redux Toolkit', 'REST APIs', 'D3.js'],
-    bullets: [
-      'Designed and delivered 8+ reusable React component modules, reducing delivery cycles by ~25%.',
-      'Partnered with Business Analysts to convert requirements into precise UI specifications.',
-      'Established frontend code review standards and mentored junior developers.'
-    ],
-  },
-  {
-    name: 'Nucleus',
-    domain: 'Enterprise Case Management Platform',
-    tech: ['Angular v14-v17', 'NgRx', 'Spring Boot v3.x', 'PostgreSQL v15', 'Keycloak'],
-    bullets: [
-      'Led Angular frontend development with Keycloak OAuth2/OIDC, enabling secure role-based access.',
-      'Introduced OnPush change detection and standalone component patterns to reduce bundle size by 35%.',
-      'Conducted systematic code reviews and technical mentorship on Angular v14+ style guidelines.'
-    ],
-  },
-  {
-    name: 'SenoClock',
-    domain: 'Digital Health Platform (Mobile)',
-    tech: ['React Ionic v6-v7', 'TypeScript', 'Tailwind CSS v3', 'PostgreSQL v14', 'AWS'],
-    bullets: [
-      'Developed cross-platform mobile interfaces, delivering consistent iOS/Android UX from one codebase.',
-      'Achieved WCAG 2.2 AA accessibility compliance across all patient-facing flows.',
-      'Integrated frontend with AWS-hosted backend reporting services for real-time updates.'
-    ],
-  },
-  {
-    name: 'Molcom & Wisebaron Portals',
-    domain: 'Wealth Management Platforms',
-    tech: ['Angular v10-v14', 'Angular Material', 'Bootstrap v5', 'Spring Boot v2.x', 'MySQL v8.0'],
-    bullets: [
-      'Served as primary frontend liaison, translating investment requirements into Angular onboarding UIs.',
-      'Designed complex reporting views and portfolio components to manage client accounts at scale.',
-      'Enforced frontend code review practices and sprint delivery discipline across the team.'
-    ],
-  },
-  {
-    name: 'Pet Health Platform',
-    domain: 'Veterinary Care Platform',
-    tech: ['React v18', 'TypeScript v5', 'Vite v5-v6', 'Redux Toolkit v2', 'Jest / RTL'],
-    bullets: [
-      'Built appointment scheduling and health record modules using React v18 and Vite v5-v6.',
-      'Achieved strong component test coverage using React Testing Library and Jest v29.',
-      'Implemented fully responsive UX across viewports using Tailwind utility-first patterns.'
-    ],
-  },
-];
-
 export default function Experience() {
+  const { t } = useI18n();
   const headingRef = useInView({ threshold: 0.1 });
   const cardRef = useInView({ threshold: 0.05 });
-  const [activeRole, setActiveRole] = useState<RoleHighlight>(DEPLOYMENT_ROLES[0]);
+
+  const deploymentRoles: RoleHighlight[] = [
+    {
+      title: t('experience.roles.techLead.title'),
+      period: t('experience.roles.techLead.duration'),
+      highlights: [
+        t('experience.roles.techLead.highlights.0'),
+        t('experience.roles.techLead.highlights.1'),
+        t('experience.roles.techLead.highlights.2'),
+        t('experience.roles.techLead.highlights.3'),
+        t('experience.roles.techLead.highlights.4')
+      ],
+      stats: [
+        { label: t('experience.roles.techLead.stats.0.label'), value: t('experience.roles.techLead.stats.0.value') },
+        { label: t('experience.roles.techLead.stats.1.label'), value: t('experience.roles.techLead.stats.1.value') },
+        { label: t('experience.roles.techLead.stats.2.label'), value: t('experience.roles.techLead.stats.2.value') }
+      ],
+      radarPoints: '100,25 172,48 152,145 42,145 32,48'
+    },
+    {
+      title: t('experience.roles.seniorDev.title'),
+      period: t('experience.roles.seniorDev.duration'),
+      highlights: [
+        t('experience.roles.seniorDev.highlights.0'),
+        t('experience.roles.seniorDev.highlights.1'),
+        t('experience.roles.seniorDev.highlights.2'),
+        t('experience.roles.seniorDev.highlights.3'),
+        t('experience.roles.seniorDev.highlights.4')
+      ],
+      stats: [
+        { label: t('experience.roles.seniorDev.stats.0.label'), value: t('experience.roles.seniorDev.stats.0.value') },
+        { label: t('experience.roles.seniorDev.stats.1.label'), value: t('experience.roles.seniorDev.stats.1.value') },
+        { label: t('experience.roles.seniorDev.stats.2.label'), value: t('experience.roles.seniorDev.stats.2.value') }
+      ],
+      radarPoints: '100,36 140,70 145,138 38,149 24,40'
+    },
+    {
+      title: t('experience.roles.frontendDev.title'),
+      period: t('experience.roles.frontendDev.duration'),
+      highlights: [
+        t('experience.roles.frontendDev.highlights.0'),
+        t('experience.roles.frontendDev.highlights.1'),
+        t('experience.roles.frontendDev.highlights.2'),
+        t('experience.roles.frontendDev.highlights.3')
+      ],
+      stats: [
+        { label: t('experience.roles.frontendDev.stats.0.label'), value: t('experience.roles.frontendDev.stats.0.value') },
+        { label: t('experience.roles.frontendDev.stats.1.label'), value: t('experience.roles.frontendDev.stats.1.value') },
+        { label: t('experience.roles.frontendDev.stats.2.label'), value: t('experience.roles.frontendDev.stats.2.value') }
+      ],
+      radarPoints: '100,50 119,94 136,126 40,144 24,76'
+    }
+  ];
+
+  const projects = [
+    {
+      name: t('experience.projects.abdoun.name'),
+      domain: t('experience.projects.abdoun.domain'),
+      tech: ['Next.js v16', 'React v19', 'FastAPI', 'PostgreSQL v16', 'AWS S3/Cognito'],
+      bullets: [
+        t('experience.projects.abdoun.bullets.0'),
+        t('experience.projects.abdoun.bullets.1'),
+        t('experience.projects.abdoun.bullets.2')
+      ]
+    },
+    {
+      name: t('experience.projects.sellpoint.name'),
+      domain: t('experience.projects.sellpoint.domain'),
+      tech: ['React.js v17-v18', 'TypeScript', 'Redux Toolkit', 'REST APIs', 'D3.js'],
+      bullets: [
+        t('experience.projects.sellpoint.bullets.0'),
+        t('experience.projects.sellpoint.bullets.1'),
+        t('experience.projects.sellpoint.bullets.2')
+      ]
+    },
+    {
+      name: t('experience.projects.nucleus.name'),
+      domain: t('experience.projects.nucleus.domain'),
+      tech: ['Angular v14-v17', 'NgRx', 'Spring Boot v3.x', 'PostgreSQL v15', 'Keycloak'],
+      bullets: [
+        t('experience.projects.nucleus.bullets.0'),
+        t('experience.projects.nucleus.bullets.1'),
+        t('experience.projects.nucleus.bullets.2')
+      ]
+    },
+    {
+      name: t('experience.projects.senoclock.name'),
+      domain: t('experience.projects.senoclock.domain'),
+      tech: ['React Ionic v6-v7', 'TypeScript', 'Tailwind CSS v3', 'PostgreSQL v14', 'AWS'],
+      bullets: [
+        t('experience.projects.senoclock.bullets.0'),
+        t('experience.projects.senoclock.bullets.1'),
+        t('experience.projects.senoclock.bullets.2')
+      ]
+    },
+    {
+      name: t('experience.projects.molcom.name'),
+      domain: t('experience.projects.molcom.domain'),
+      tech: ['Angular v10-v14', 'Angular Material', 'Bootstrap v5', 'Spring Boot v2.x', 'MySQL v8.0'],
+      bullets: [
+        t('experience.projects.molcom.bullets.0'),
+        t('experience.projects.molcom.bullets.1'),
+        t('experience.projects.molcom.bullets.2')
+      ]
+    },
+    {
+      name: t('experience.projects.pethealth.name'),
+      domain: t('experience.projects.pethealth.domain'),
+      tech: ['React v18', 'TypeScript v5', 'Vite v5-v6', 'Redux Toolkit v2', 'Jest / RTL'],
+      bullets: [
+        t('experience.projects.pethealth.bullets.0'),
+        t('experience.projects.pethealth.bullets.1'),
+        t('experience.projects.pethealth.bullets.2')
+      ]
+    }
+  ];
+
+  const [activeRole, setActiveRole] = useState<RoleHighlight>(deploymentRoles[0]);
+
+  // Synchronize state when language changes to prevent displaying old translations
+  useEffect(() => {
+    const matched = deploymentRoles.find((r) => r.radarPoints === activeRole.radarPoints);
+    if (matched) {
+      setActiveRole(matched);
+    } else {
+      setActiveRole(deploymentRoles[0]);
+    }
+  }, [t]);
 
   return (
     <section id="experience" className="py-24 bg-white dark:bg-surface-900 relative">
@@ -141,13 +154,13 @@ export default function Experience() {
           className="opacity-0 [&.in-view]:animate-fade-up mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900 text-primary-600 dark:text-primary-400 text-xs font-semibold uppercase tracking-widest mb-4">
-            Deployment History
+            {t('experience.sectionTitle')}
           </div>
-          <h2 className="section-heading text-surface-900 dark:text-white">
-            [CHRONOLOGICAL DEPLOYMENT RECORD]
+          <h2 className="section-heading text-surface-900 dark:text-white font-mono">
+            {t('experience.headingRecord')}
           </h2>
           <p className="section-subheading">
-            7 years of engineering impact at Coderlook Solutions, progressing from core developer to architect lead.
+            {t('experience.timelineSubtitle')}
           </p>
         </div>
 
@@ -168,7 +181,7 @@ export default function Experience() {
             <div className="flex flex-col sm:flex-row sm:items-start justify-between border-b border-slate-200 dark:border-white/[0.06] pb-6 mb-6">
               <div>
                 <span className="text-[10px] text-slate-500 font-mono uppercase tracking-widest font-bold block mb-1">
-                  Active Deployment Node
+                  {t('experience.activeDeploymentNode')}
                 </span>
                 <h3 className="text-xl font-bold text-surface-900 dark:text-white flex items-center gap-2">
                   <a
@@ -181,9 +194,9 @@ export default function Experience() {
                   </a>
                 </h3>
                 {/* Role Switcher tabs */}
-                <div className="flex gap-2 mt-4 select-none">
-                  {DEPLOYMENT_ROLES.map((role) => {
-                    const isActive = activeRole.title === role.title;
+                <div className="flex gap-2 mt-4 select-none flex-wrap">
+                  {deploymentRoles.map((role) => {
+                    const isActive = activeRole.radarPoints === role.radarPoints;
                     return (
                       <button
                         key={role.title}
@@ -213,7 +226,7 @@ export default function Experience() {
                 </div>
                 <div className="flex items-center gap-1.5 sm:justify-end text-emerald-400 font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  STABLE OPERATION
+                  {t('experience.stableOperation')}
                 </div>
               </div>
             </div>
@@ -250,7 +263,7 @@ export default function Experience() {
             <div className="absolute -bottom-[1px] -right-[1px] w-5 h-5 border-b-2 border-r-2 border-indigo-500 rounded-br-2xl pointer-events-none" />
 
             <span className="text-[10px] text-slate-500 font-mono uppercase tracking-widest font-bold mb-4 select-none">
-              CAPABILITIES TELEMETRY
+              {t('experience.capabilitiesTelemetry')}
             </span>
 
             {/* SVG Radar Chart */}
@@ -302,28 +315,28 @@ export default function Experience() {
               </svg>
 
               {/* Labels */}
-              <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[9px] font-mono font-bold text-indigo-400">ARCH</span>
-              <span className="absolute top-[68px] -right-3 text-[9px] font-mono font-bold text-indigo-400">LEAD</span>
-              <span className="absolute -bottom-2 right-6 text-[9px] font-mono font-bold text-indigo-400">FSD</span>
-              <span className="absolute -bottom-2 left-6 text-[9px] font-mono font-bold text-indigo-400">PERF</span>
-              <span className="absolute top-[68px] -left-2 text-[9px] font-mono font-bold text-indigo-400">UX</span>
+              <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[9px] font-mono font-bold text-indigo-400">{t('experience.radarArch')}</span>
+              <span className="absolute top-[68px] -right-3 text-[9px] font-mono font-bold text-indigo-400">{t('experience.radarLead')}</span>
+              <span className="absolute -bottom-2 right-6 text-[9px] font-mono font-bold text-indigo-400">{t('experience.radarCode')}</span>
+              <span className="absolute -bottom-2 left-6 text-[9px] font-mono font-bold text-indigo-400">{t('experience.radarPerf')}</span>
+              <span className="absolute top-[68px] -left-2 text-[9px] font-mono font-bold text-indigo-400">{t('experience.radarUX')}</span>
             </div>
 
             <div className="mt-8 text-center text-xs text-slate-500 font-mono leading-relaxed select-text border-t border-slate-200 dark:border-white/[0.04] pt-4 w-full">
-              <span className="text-[10px] text-slate-600 font-bold block mb-1">MODULE SPECS:</span>
-              <p>Dynamic capabilities profile computed based on core shipped production nodes.</p>
+              <span className="text-[10px] text-slate-600 font-bold block mb-1">{t('experience.moduleSpecs')}</span>
+              <p>{t('experience.capabilitiesDesc')}</p>
             </div>
           </div>
         </div>
 
         {/* Project Cards */}
         <div>
-          <h3 className="text-lg font-bold text-surface-900 dark:text-white mb-6 flex items-center gap-2 select-none">
+          <h3 className="text-lg font-bold text-surface-900 dark:text-white mb-6 flex items-center gap-2 select-none font-mono">
             <Briefcase size={16} className="text-indigo-500" />
-            [PROJECT SHIELD SHIPPED LOGS]
+            {t('experience.projectShippedLogs')}
           </h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {PROJECTS.map((project, i) => {
+            {projects.map((project, i) => {
               const pRef = useInView({ threshold: 0.05 });
               return (
                 <div
