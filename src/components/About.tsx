@@ -1,31 +1,33 @@
 import { useInView } from '../hooks/useInView';
 import { Code2, Layers, Zap, Users, MapPin } from 'lucide-react';
-
-const HIGHLIGHTS = [
-  {
-    icon: Code2,
-    title: 'Full-Stack Capability',
-    description: 'Beyond frontend — proficient in FastAPI, PostgreSQL, and AWS for end-to-end feature delivery.',
-  },
-  {
-    icon: Layers,
-    title: 'Architecture First',
-    description: 'Design scalable component systems, state architectures, and module boundaries for large teams.',
-  },
-  {
-    icon: Zap,
-    title: 'Performance Obsessed',
-    description: 'Reduced load times and bundle sizes significantly across multiple enterprise projects.',
-  },
-  {
-    icon: Users,
-    title: 'Mentor & Lead',
-    description: 'Led and mentored frontend teams, conducted code reviews, and established best practices.',
-  },
-];
+import { useI18n } from '../locales';
 
 export default function About() {
+  const { t } = useI18n();
   const sectionRef = useInView({ threshold: 0.1 });
+
+  const highlightsTranslated = [
+    {
+      icon: Code2,
+      title: t('about.fullStackCapability'),
+      description: t('about.fullStackCapabilityDesc'),
+    },
+    {
+      icon: Layers,
+      title: t('about.architectureFirst'),
+      description: t('about.architectureFirstDesc'),
+    },
+    {
+      icon: Zap,
+      title: t('about.performanceObsessed'),
+      description: t('about.performanceObsessedDesc'),
+    },
+    {
+      icon: Users,
+      title: t('about.mentorLead'),
+      description: t('about.mentorLeadDesc'),
+    },
+  ];
 
   return (
     <section id="about" className="py-24 bg-white dark:bg-surface-900">
@@ -35,12 +37,12 @@ export default function About() {
           className="opacity-0 [&.in-view]:animate-fade-up"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900 text-primary-600 dark:text-primary-400 text-xs font-semibold uppercase tracking-widest mb-4">
-            About Me
+            {t('about.sectionTitle')}
           </div>
           <h2 className="section-heading text-surface-900 dark:text-white mb-4">
-            Crafting digital experiences
+            {t('about.heading')}
             <br />
-            <span className="gradient-text">that scale.</span>
+            <span className="gradient-text">{t('about.headingAccent')}</span>
           </h2>
         </div>
 
@@ -65,23 +67,23 @@ export default function About() {
                 />
               </a>
               <div className="text-center sm:text-left space-y-1.5">
-                <h3 className="text-lg font-bold text-surface-900 dark:text-white">Arindam Betal</h3>
-                <p className="text-xs font-semibold text-primary-600 dark:text-primary-400 font-mono">[Senior Frontend Developer]</p>
-                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-surface-500 dark:text-surface-400">
+                <h3 className="text-lg font-bold text-surface-900 dark:text-white font-mono">Arindam Betal</h3>
+                <p className="text-xs font-semibold text-primary-600 dark:text-primary-400 font-mono">[{t('hero.badge')}]</p>
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs text-surface-500 dark:text-surface-400 font-mono">
                   <MapPin size={13} className="text-primary-500" />
                   <span>Kolkata, India (Remote)</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider select-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  active node
+                  {t('common.activeNode')}
                 </div>
               </div>
             </div>
 
             {[
-              `Senior Frontend Developer with 7 years of enterprise production experience delivering high-performance, accessible, and scalable web and mobile applications across Healthcare, Real Estate, Fintech, Case Management, and Veterinary Care domains.`,
-              `Expert-level proficiency in React (v16–v19), TypeScript (v3–v5), Next.js (v12–v16), and Angular (v10–v19), with hands-on full-stack contribution using FastAPI, PostgreSQL, and AWS.`,
-              `Consistent record of leading frontend architecture, establishing code quality standards, mentoring developers, and integrating AI-powered features via OpenAI API in production environments.`,
+              t('about.bioParagraph1'),
+              t('about.bioParagraph2'),
+              t('about.bioParagraph3'),
             ].map((para, i) => {
               const paraRef = useInView({ threshold: 0.1 });
               return (
@@ -107,7 +109,7 @@ export default function About() {
 
           {/* Highlights grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {HIGHLIGHTS.map((item, i) => {
+            {highlightsTranslated.map((item, i) => {
               const cardRef = useInView({ threshold: 0.1 });
               return (
                 <div
@@ -130,3 +132,4 @@ export default function About() {
     </section>
   );
 }
+

@@ -1,6 +1,8 @@
 import { useState, FormEvent, useEffect } from 'react';
 import { useInView } from '../hooks/useInView';
 import { Mail, Linkedin, MapPin, Send, CheckCircle, XCircle, Loader, Terminal, Users, UserCheck } from 'lucide-react';
+import { useI18n } from '../locales';
+import { handleLinkedInClick } from '../utils/linkedin';
 
 type FormState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -18,15 +20,15 @@ interface Signature {
   nodeIndex: number;
 }
 
-
-
 export default function Contact() {
+  const { t } = useI18n();
   const headingRef = useInView({ threshold: 0.1 });
   const [formData, setFormData] = useState<FormData>({ name: '', email: '', message: '' });
   const [formState, setFormState] = useState<FormState>('idle');
   const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
   const [touched, setTouched] = useState<{ name?: boolean; email?: boolean; message?: boolean }>({});
   const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   // Guestbook states
   const [signatures, setSignatures] = useState<Signature[]>([]);
@@ -43,22 +45,22 @@ export default function Contact() {
       const defaultSignatures: Signature[] = [
         {
           id: 'sig-1',
-          name: 'Sarah Connor (Tech Recruiter)',
-          message: 'This mecha terminal is insane! Love the skills compiler tab. Sending a LinkedIn connection today!',
+          name: t('contact.signatures.connor.name'),
+          message: t('contact.signatures.connor.message'),
           created_at: new Date(Date.now() - 3600000 * 2.5).toISOString(),
           nodeIndex: 42
         },
         {
           id: 'sig-2',
-          name: 'LexCorp Lead (Developer)',
-          message: 'PING: Custom target cursor latency looks ultra low. Awesome engineering details.',
+          name: t('contact.signatures.lexcorp.name'),
+          message: t('contact.signatures.lexcorp.message'),
           created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
           nodeIndex: 88
         },
         {
           id: 'sig-3',
-          name: 'Cyberdyne Architect',
-          message: 'SYSTEM DIALOGUE: Design tokens are fully responsive. 10/10 scoring.',
+          name: t('contact.signatures.cyberdyne.name'),
+          message: t('contact.signatures.cyberdyne.message'),
           created_at: new Date(Date.now() - 3600000 * 48).toISOString(),
           nodeIndex: 12
         }
@@ -66,10 +68,11 @@ export default function Contact() {
       setSignatures(defaultSignatures);
       localStorage.setItem('guestbook_signatures', JSON.stringify(defaultSignatures));
     }
-  }, []);
+  }, [t]);
 
-  const showToast = (message: string) => {
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message);
+    setToastType(type);
     setTimeout(() => setToastMessage(''), 5000);
   };
 
@@ -79,22 +82,22 @@ export default function Contact() {
 
     if (field === 'name') {
       if (!trimmed) {
-        error = 'Sender Name is required.';
+        error = t('contact.errors.nameRequired');
       } else if (trimmed.length < 3) {
-        error = 'Sender Name must be at least 3 characters.';
+        error = t('contact.errors.nameMin');
       }
     } else if (field === 'email') {
       const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!trimmed) {
-        error = 'Secure Email Link is required.';
+        error = t('contact.errors.emailRequired');
       } else if (!emailRegex.test(trimmed)) {
-        error = 'Please enter a valid email address.';
+        error = t('contact.errors.emailInvalid');
       }
     } else if (field === 'message') {
       if (!trimmed) {
-        error = 'Payload Message is required.';
+        error = t('contact.errors.messageRequired');
       } else if (trimmed.length < 5) {
-        error = 'Payload Message must be at least 5 characters.';
+        error = t('contact.errors.messageMin');
       }
     }
 
@@ -124,18 +127,22 @@ export default function Contact() {
     e.preventDefault();
     if (formState === 'loading') return;
 
+    const nameTrimmed = formData.name.trim();
+    const emailTrimmed = formData.email.trim();
+    const messageTrimmed = formData.message.trim();
+
     // Mark all fields as touched to show errors immediately
     setTouched({ name: true, email: true, message: true });
 
     // Validate all fields
-    const nameError = validateField('name', formData.name);
-    const emailError = validateField('email', formData.email);
-    const messageError = validateField('message', formData.message);
+    const nameError = validateField('name', nameTrimmed);
+    const emailError = validateField('email', emailTrimmed);
+    const messageError = validateField('message', messageTrimmed);
 
     if (nameError || emailError || messageError) {
       setFormState('error');
       const firstError = nameError || emailError || messageError;
-      showToast(`Validation Error: ${firstError}`);
+      showToast(t('common.validationErrorTitle', { error: firstError }), 'error');
       setTimeout(() => setFormState('idle'), 3000);
       return;
     }
@@ -157,14 +164,15 @@ export default function Contact() {
       if (response.ok) {
         setFormState('success');
         setFormData({ name: '', email: '', message: '' });
-        showToast('Message sent! I\'ll get back to you soon.');
+        setTouched({});
+        showToast(t('common.messageSentSuccess'), 'success');
       } else {
         const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'Failed to send');
+        throw new Error(errData.error || t('common.somethingWentWrong'));
       }
     } catch (err: any) {
       setFormState('error');
-      showToast(err.message || 'Something went wrong. Please email me directly at arindambetal1994@gmail.com');
+      showToast(err.message || t('common.somethingWentWrong'), 'error');
     } finally {
       setTimeout(() => setFormState('idle'), 3000);
     }
@@ -193,7 +201,7 @@ export default function Contact() {
       setGuestName('');
       setGuestMessage('');
       setGuestbookState('success');
-      showToast('Signature added successfully to access logs.');
+      showToast(t('contact.signatureRecorded'), 'success');
 
       setTimeout(() => setGuestbookState('idle'), 2000);
     }, 800);
@@ -206,11 +214,11 @@ export default function Contact() {
       {/* Toast */}
       {toastMessage && (
         <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-5 py-4 rounded-xl shadow-xl border text-sm font-medium transition-all duration-300 max-w-sm ${
-          formState === 'success' || formState === 'idle'
+          toastType === 'success'
             ? 'bg-white dark:bg-surface-800 border-accent-200 dark:border-accent-800 text-surface-800 dark:text-surface-100'
             : 'bg-white dark:bg-surface-800 border-red-200 dark:border-red-800 text-surface-800 dark:text-surface-100'
         }`}>
-          {formState === 'success' || formState === 'idle' ? (
+          {toastType === 'success' ? (
             <CheckCircle size={18} className="text-accent-500 shrink-0" />
           ) : (
             <XCircle size={18} className="text-red-500 shrink-0" />
@@ -227,13 +235,13 @@ export default function Contact() {
           className="opacity-0 [&.in-view]:animate-fade-up mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900 text-primary-600 dark:text-primary-400 text-xs font-semibold uppercase tracking-widest mb-4">
-            Connect
+            {t('contact.sectionTitle')}
           </div>
           <h2 className="section-heading text-surface-900 dark:text-white">
-            Let's work together
+            {t('contact.heading')}
           </h2>
           <p className="section-subheading">
-            Open to senior/staff-level opportunities and interesting engineering challenges
+            {t('contact.subtitle')}
           </p>
         </div>
 
@@ -252,7 +260,7 @@ export default function Contact() {
                     <Mail size={18} className="text-primary-600 dark:text-primary-400" />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-0.5">Email</div>
+                    <div className="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-0.5">{t('contact.emailLink').split(' ')[1] || 'Email'}</div>
                     <a href="mailto:arindambetal1994@gmail.com" className="text-sm font-medium text-surface-800 dark:text-surface-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors break-all">
                       arindambetal1994@gmail.com
                     </a>
@@ -267,6 +275,7 @@ export default function Contact() {
                     <div className="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-0.5">LinkedIn</div>
                     <a
                       href="https://www.linkedin.com/public-profile/settings/?trk=d_flagship3_profile_self_view_public_profile&lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3Bjuek2v8FTM631TBlBI1C8A%3D%3D"
+                      onClick={handleLinkedInClick}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm font-medium text-surface-800 dark:text-surface-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
@@ -281,11 +290,11 @@ export default function Contact() {
                     <MapPin size={18} className="text-primary-600 dark:text-primary-400" />
                   </div>
                   <div>
-                    <div className="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-0.5">Location</div>
+                    <div className="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase tracking-wide mb-0.5">{t('education.location').split(',')[1]?.trim() || 'Location'}</div>
                     <div className="text-sm font-medium text-surface-800 dark:text-surface-200">
                       Kolkata, India
                     </div>
-                    <div className="text-xs text-surface-400 dark:text-surface-500 mt-0.5">Open to remote opportunities</div>
+                    <div className="text-xs text-surface-400 dark:text-surface-500 mt-0.5">{t('contact.subtitle')}</div>
                   </div>
                 </div>
               </div>
@@ -293,12 +302,17 @@ export default function Contact() {
 
             <div className="card p-6 bg-gradient-to-br from-primary-50 to-primary-100/50 dark:from-primary-950/40 dark:to-primary-900/20 border-primary-200 dark:border-primary-800 relative flex-1 flex flex-col justify-center">
               <div className="absolute -top-[1px] -left-[1px] w-5 h-5 border-t-2 border-l-2 border-indigo-500 rounded-tl-2xl pointer-events-none" />
-              <div className="absolute -top-[1px] -right-[1px] w-5 h-5 border-t-2 border-r-2 border-indigo-500 rounded-tr-2xl pointer-events-none" />
+              <div className="absolute -top-[1px] -right-[1px] w-5 h-5 border-t-2 border-r-2 border-indigo-500 pointer-events-none rounded-tr-2xl" />
               <div className="absolute -bottom-[1px] -left-[1px] w-5 h-5 border-b-2 border-l-2 border-indigo-500 rounded-bl-2xl pointer-events-none" />
               <div className="absolute -bottom-[1px] -right-[1px] w-5 h-5 border-b-2 border-r-2 border-indigo-500 rounded-br-2xl pointer-events-none" />
-              <h3 className="font-bold text-surface-900 dark:text-white mb-2 text-sm uppercase font-mono tracking-wider">[Target Directives]</h3>
+              <h3 className="font-bold text-surface-900 dark:text-white mb-2 text-sm uppercase font-mono tracking-wider">[{t('contact.targetDirectives')}]</h3>
               <ul className="space-y-1.5">
-                {['Senior Frontend Engineer roles', 'Technical Lead positions', 'Full-stack opportunities', 'React / Angular consulting'].map((item) => (
+                {[
+                  t('contact.directivesList.0'),
+                  t('contact.directivesList.1'),
+                  t('contact.directivesList.2'),
+                  t('contact.directivesList.3')
+                ].map((item) => (
                   <li key={item} className="flex items-center gap-2 text-xs text-surface-600 dark:text-surface-300 font-mono">
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
                     {item}
@@ -320,7 +334,7 @@ export default function Contact() {
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
                     <label htmlFor="name" className="block text-xs font-mono font-bold text-surface-700 dark:text-surface-300 mb-1.5">
-                      Sender Name
+                      {t('contact.senderName')}
                     </label>
                     <input
                       id="name"
@@ -329,7 +343,7 @@ export default function Contact() {
                       value={formData.name}
                       onChange={(e) => handleChange('name', e.target.value)}
                       onBlur={() => handleBlur('name')}
-                      placeholder="Your name"
+                      placeholder={t('contact.namePlaceholder')}
                       className={`w-full px-4 py-3 rounded-xl border bg-surface-50 dark:bg-surface-800 text-surface-900 dark:text-white placeholder-surface-400 dark:placeholder-surface-500 focus:outline-none focus:ring-2 transition-all text-sm font-mono ${
                         touched.name && errors.name
                           ? 'border-red-500 dark:border-red-500/80 focus:ring-red-500/30 focus:border-red-500'
@@ -345,7 +359,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <label htmlFor="email" className="block text-xs font-mono font-bold text-surface-700 dark:text-surface-300 mb-1.5">
-                      Secure Email Link
+                      {t('contact.emailLink')}
                     </label>
                     <input
                       id="email"
@@ -354,7 +368,7 @@ export default function Contact() {
                       value={formData.email}
                       onChange={(e) => handleChange('email', e.target.value)}
                       onBlur={() => handleBlur('email')}
-                      placeholder="your@email.com"
+                      placeholder={t('contact.emailPlaceholder')}
                       className={`w-full px-4 py-3 rounded-xl border bg-surface-50 dark:bg-surface-800 text-surface-900 dark:text-white placeholder-surface-400 dark:placeholder-surface-500 focus:outline-none focus:ring-2 transition-all text-sm font-mono ${
                         touched.email && errors.email
                           ? 'border-red-500 dark:border-red-500/80 focus:ring-red-500/30 focus:border-red-500'
@@ -372,7 +386,7 @@ export default function Contact() {
 
                 <div>
                   <label htmlFor="message" className="block text-xs font-mono font-bold text-surface-700 dark:text-surface-300 mb-1.5">
-                    Payload Message
+                    {t('contact.payloadMessage')}
                   </label>
                   <textarea
                     id="message"
@@ -381,7 +395,7 @@ export default function Contact() {
                     value={formData.message}
                     onChange={(e) => handleChange('message', e.target.value)}
                     onBlur={() => handleBlur('message')}
-                    placeholder="Describe your project requirements or career opportunity details..."
+                    placeholder={t('contact.messagePlaceholder')}
                     className={`w-full px-4 py-3 rounded-xl border bg-surface-50 dark:bg-surface-800 text-surface-900 dark:text-white placeholder-surface-400 dark:placeholder-surface-500 focus:outline-none focus:ring-2 transition-all resize-none text-sm font-mono ${
                       touched.message && errors.message
                         ? 'border-red-500 dark:border-red-500/80 focus:ring-red-500/30 focus:border-red-500'
@@ -406,18 +420,18 @@ export default function Contact() {
                   {isLoading ? (
                     <>
                       <Loader size={16} className="animate-spin" />
-                      SENDING DIRECTIVE...
+                      {t('contact.sendingDirectiveButton')}
                     </>
                   ) : (
                     <>
                       <Send size={16} />
-                      TRANSMIT MESSAGE
+                      {t('contact.transmitButton')}
                     </>
                   )}
                 </button>
 
                 <p className="text-xs text-center text-surface-400 dark:text-surface-500 font-mono">
-                  Direct mail connection:{' '}
+                  {t('common.directMailConnection')}:{' '}
                   <a href="mailto:arindambetal1994@gmail.com" className="text-primary-600 dark:text-primary-400 hover:underline">
                     arindambetal1994@gmail.com
                   </a>
@@ -431,7 +445,7 @@ export default function Contact() {
         <div className="relative rounded-2xl border border-slate-200 dark:border-white/[0.08] bg-slate-50/50 dark:bg-slate-950/20 p-6 sm:p-8 shadow-md">
           {/* Cybernetic Corner Brackets */}
           <div className="absolute -top-[1px] -left-[1px] w-5 h-5 border-t-2 border-l-2 border-indigo-500 rounded-tl-2xl pointer-events-none" />
-          <div className="absolute -top-[1px] -right-[1px] w-5 h-5 border-t-2 border-r-2 border-indigo-500 rounded-tr-2xl pointer-events-none" />
+          <div className="absolute -top-[1px] -right-[1px] w-5 h-5 border-t-2 border-r-2 border-indigo-500 pointer-events-none rounded-tr-2xl" />
           <div className="absolute -bottom-[1px] -left-[1px] w-5 h-5 border-b-2 border-l-2 border-indigo-500 rounded-bl-2xl pointer-events-none" />
           <div className="absolute -bottom-[1px] -right-[1px] w-5 h-5 border-b-2 border-r-2 border-indigo-500 rounded-br-2xl pointer-events-none" />
 
@@ -439,10 +453,10 @@ export default function Contact() {
           <div className="flex items-center gap-3 border-b border-slate-200 dark:border-white/[0.06] pb-4 mb-6 select-none">
             <Users size={18} className="text-indigo-400" />
             <h3 className="text-sm font-bold text-surface-900 dark:text-white uppercase font-mono tracking-wider">
-              [ACCESS SIGNATURE LOG]
+              [{t('contact.accessSignatureLog')}]
             </h3>
             <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider select-none">
-              active logs
+              {t('contact.activeLogs')}
             </span>
           </div>
 
@@ -450,7 +464,7 @@ export default function Contact() {
             {/* Signature entry form */}
             <form onSubmit={handleGuestbookSubmit} className="space-y-4 bg-white dark:bg-slate-900/40 p-5 rounded-xl border border-slate-200 dark:border-white/[0.04]">
               <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono font-bold block mb-1">
-                Record New Entry
+                {t('contact.recordNewEntry')}
               </span>
               <div>
                 <input
@@ -458,7 +472,7 @@ export default function Contact() {
                   required
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="Visitor Name / Handle"
+                  placeholder={t('contact.visitorNamePlaceholder')}
                   className="w-full px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 text-surface-900 dark:text-white placeholder-surface-400 dark:placeholder-surface-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs font-mono"
                 />
               </div>
@@ -468,7 +482,7 @@ export default function Contact() {
                   rows={3}
                   value={guestMessage}
                   onChange={(e) => setGuestMessage(e.target.value)}
-                  placeholder="Leave your signature message..."
+                  placeholder={t('contact.visitorMessagePlaceholder')}
                   className="w-full px-3 py-2 rounded-lg border border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800 text-surface-900 dark:text-white placeholder-surface-400 dark:placeholder-surface-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none text-xs font-mono"
                 />
               </div>
@@ -481,17 +495,17 @@ export default function Contact() {
                 {guestbookState === 'submitting' ? (
                   <>
                     <Loader size={12} className="animate-spin" />
-                    SIGNING NODE...
+                    {t('contact.signingNode')}
                   </>
                 ) : guestbookState === 'success' ? (
                   <>
                     <UserCheck size={12} className="text-emerald-400" />
-                    SIGNATURE RECORDED
+                    {t('contact.signatureRecorded')}
                   </>
                 ) : (
                   <>
                     <Terminal size={11} />
-                    SIGN VISITOR LOG
+                    {t('contact.signVisitorLog')}
                   </>
                 )}
               </button>
@@ -500,8 +514,8 @@ export default function Contact() {
             {/* Signature list */}
             <div className="space-y-4 max-h-[260px] overflow-y-auto pr-2 scrollbar-thin">
               {signatures.length === 0 ? (
-                <div className="text-center py-10 font-mono text-slate-500 text-xs">
-                  No access records in database. Be the first to sign!
+                <div className="text-center py-10 font-mono text-slate-500 text-xs animate-fade-up">
+                  {t('contact.noAccessRecords')}
                 </div>
               ) : (
                 signatures.map((sig) => (
@@ -512,7 +526,7 @@ export default function Contact() {
                     {/* Mecha Avatar Initials Circle */}
                     <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex flex-col items-center justify-center font-mono text-xs font-bold text-indigo-400 shrink-0 select-none">
                       <span>{sig.name.charAt(0).toUpperCase()}</span>
-                      <span className="text-[7px] text-slate-500">N.{sig.nodeIndex}</span>
+                      <span className="text-[7px] text-slate-500">N.{sig.nodeIndex || 42}</span>
                     </div>
 
                     <div className="flex-1 min-w-0">

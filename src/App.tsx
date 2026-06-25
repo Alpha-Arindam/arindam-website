@@ -11,6 +11,7 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
 import CompanyDetails from './components/CompanyDetails';
+import { I18nProvider } from './locales';
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname);
@@ -92,20 +93,22 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-950 transition-colors duration-300">
-      <CustomCursor />
-      <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode((d) => !d)} />
-      <main>
-        <Hero />
-        <About />
-        <Skills />
-        <Experience />
-        <Projects />
-        <Education />
-        <Achievements />
-        <Contact />
-      </main>
-      <Footer />
-    </div>
+    <I18nProvider>
+      <div className="min-h-screen bg-surface-50 dark:bg-surface-950 transition-colors duration-300">
+        <CustomCursor />
+        <Navbar darkMode={darkMode} toggleDarkMode={() => setDarkMode((d) => !d)} />
+        <main>
+          <Hero />
+          <About />
+          <Skills />
+          <Experience />
+          <Projects />
+          <Education />
+          <Achievements />
+          <Contact />
+        </main>
+        <Footer />
+      </div>
+    </I18nProvider>
   );
 }

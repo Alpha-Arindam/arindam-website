@@ -1,47 +1,49 @@
 import { useInView } from '../hooks/useInView';
 import { Award, Star } from 'lucide-react';
-
-const ACHIEVEMENTS = [
-  {
-    title: 'React + Angular Dual Expertise',
-    description: 'Enterprise-grade proficiency in both major frontend frameworks — delivering production systems across different client tech stacks.',
-    icon: '⚡',
-    tags: ['React 18/19', 'Angular 17+', 'Enterprise'],
-  },
-  {
-    title: 'Full-Stack Contribution',
-    description: 'Extended beyond frontend to deliver end-to-end features with FastAPI backends, PostgreSQL schemas, and AWS infrastructure.',
-    icon: '🔗',
-    tags: ['FastAPI', 'PostgreSQL', 'AWS'],
-  },
-  {
-    title: 'AI Feature Integration',
-    description: 'Pioneered OpenAI API integrations into production frontend applications, delivering intelligent user experiences before it became mainstream.',
-    icon: '🤖',
-    tags: ['OpenAI API', 'Prompt Engineering', 'LLM'],
-  },
-  {
-    title: 'WCAG 2.2 AA Accessibility',
-    description: 'Delivered fully accessible interfaces meeting WCAG 2.2 AA standards across enterprise fintech portals, broadening user reach.',
-    icon: '♿',
-    tags: ['WCAG 2.2 AA', 'a11y', 'Inclusive Design'],
-  },
-  {
-    title: 'Framework Upgrade Champion',
-    description: 'Led major framework migrations — React v16→19 and Angular v10→19 — with zero production downtime and full test coverage.',
-    icon: '🚀',
-    tags: ['React v16→19', 'Angular v10→19', 'Zero Downtime'],
-  },
-  {
-    title: 'Technical Leadership',
-    description: 'Promoted to Technical Lead, mentoring 4+ developers, establishing engineering standards, and leading cross-functional delivery.',
-    icon: '👥',
-    tags: ['Team Lead', 'Mentorship', 'Architecture'],
-  },
-];
+import { useI18n } from '../locales';
 
 export default function Achievements() {
+  const { t } = useI18n();
   const headingRef = useInView({ threshold: 0.1 });
+
+  const achievements = [
+    {
+      title: t('achievements.list.0.title'),
+      description: t('achievements.list.0.description'),
+      icon: '⚡',
+      tags: ['React 18/19', 'Angular 17+', 'Enterprise'],
+    },
+    {
+      title: t('achievements.list.1.title'),
+      description: t('achievements.list.1.description'),
+      icon: '🔗',
+      tags: ['FastAPI', 'PostgreSQL', 'AWS'],
+    },
+    {
+      title: t('achievements.list.2.title'),
+      description: t('achievements.list.2.description'),
+      icon: '🤖',
+      tags: ['OpenAI API', 'Prompt Engineering', 'LLM'],
+    },
+    {
+      title: t('achievements.list.3.title'),
+      description: t('achievements.list.3.description'),
+      icon: '♿',
+      tags: ['WCAG 2.2 AA', 'a11y', 'Inclusive Design'],
+    },
+    {
+      title: t('achievements.list.4.title'),
+      description: t('achievements.list.4.description'),
+      icon: '🚀',
+      tags: ['React v16→19', 'Angular v10→19', 'Zero Downtime'],
+    },
+    {
+      title: t('achievements.list.5.title'),
+      description: t('achievements.list.5.description'),
+      icon: '👥',
+      tags: ['Team Lead', 'Mentorship', 'Architecture'],
+    },
+  ];
 
   return (
     <section id="achievements" className="py-24 bg-surface-50 dark:bg-surface-950">
@@ -52,26 +54,30 @@ export default function Achievements() {
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900 text-primary-600 dark:text-primary-400 text-xs font-semibold uppercase tracking-widest mb-4">
             <Award size={12} />
-            Achievements
+            {t('achievements.sectionTitle')}
           </div>
           <h2 className="section-heading text-surface-900 dark:text-white">
-            Career highlights
+            {t('achievements.heading')}
           </h2>
           <p className="section-subheading">
-            Key differentiators that define my professional journey
+            {t('achievements.subtitle')}
           </p>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {ACHIEVEMENTS.map((item, i) => {
+          {achievements.map((item, i) => {
             const cardRef = useInView({ threshold: 0.05 });
             return (
               <div
                 key={item.title}
                 ref={cardRef as React.RefObject<HTMLDivElement>}
-                className="card opacity-0 [&.in-view]:animate-fade-up p-6 group hover:-translate-y-1"
+                className="card opacity-0 [&.in-view]:animate-fade-up p-6 group hover:-translate-y-1 relative"
                 style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'forwards' }}
               >
+                {/* Cybernetic Corner Brackets */}
+                <div className="absolute -top-[1px] -left-[1px] w-4 h-4 border-t-2 border-l-2 border-indigo-500/30 rounded-tl-xl pointer-events-none group-hover:border-indigo-500/60 transition-colors" />
+                <div className="absolute -bottom-[1px] -right-[1px] w-4 h-4 border-b-2 border-r-2 border-indigo-500/30 rounded-br-xl pointer-events-none group-hover:border-indigo-500/60 transition-colors" />
+
                 <div className="flex items-start gap-4 mb-4">
                   <div className="w-11 h-11 rounded-xl bg-surface-100 dark:bg-surface-700 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                     {item.icon}
@@ -87,7 +93,7 @@ export default function Achievements() {
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {item.tags.map((tag) => (
-                    <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-900">
+                    <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 border border-primary-100 dark:border-primary-900 font-mono">
                       <Star size={9} />
                       {tag}
                     </span>

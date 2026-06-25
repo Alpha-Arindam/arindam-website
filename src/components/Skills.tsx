@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useInView } from '../hooks/useInView';
 import { Code2, Play, CheckCircle, Terminal, Sparkles } from 'lucide-react';
+import { useI18n } from '../locales';
 
 interface SkillModule {
   category: string;
@@ -191,7 +192,7 @@ jobs:
         run: aws s3 sync dist/ s3://arindam-website --delete
         env:
           AWS_ACCESS_KEY_ID: \${{ secrets.AWS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: \${{ secrets.AWS_SECRET }}`,
+          AWS_SECRET_ACCESS_KEY: \${{ secrets.AWS_SECRET }\}`,
     logs: [
       'GitHub runner triggered.',
       'Syncing assets with S3: s3://arindam-website.',
@@ -250,17 +251,33 @@ export async function generateProfileInsights(history: string) {
 ];
 
 export default function Skills() {
+  const { t } = useI18n();
   const headingRef = useInView({ threshold: 0.1 });
   const [activeModule, setActiveModule] = useState<SkillModule>(SKILL_MODULES[0]);
   const [compilerState, setCompilerState] = useState<'idle' | 'compiling' | 'running' | 'done'>('idle');
   const [consoleHistory, setConsoleHistory] = useState<string[]>([]);
   const consoleEndRef = useRef<HTMLDivElement>(null);
 
+  const getCategoryTranslation = (category: string) => {
+    switch (category) {
+      case 'Frontend Core': return t('skills.tabs.frontend');
+      case 'Languages': return t('skills.tabs.languages');
+      case 'State Management': return t('skills.tabs.stateManagement');
+      case 'Styling Engine': return t('skills.tabs.stylingEngine');
+      case 'Backend & APIs': return t('skills.tabs.backend');
+      case 'Databases': return t('skills.tabs.databases');
+      case 'Cloud & DevOps': return t('skills.tabs.cloudDevops');
+      case 'Testing & QA': return t('skills.tabs.testingQa');
+      case 'AI / GenAI': return t('skills.tabs.aiGenai');
+      default: return category;
+    }
+  };
+
   // Load active module logs into terminal initially
   useEffect(() => {
-    setConsoleHistory([`// Loaded module: ${activeModule.filename}`, 'Ready to execute...']);
+    setConsoleHistory([`// ${t('skills.loadedModule')}: ${activeModule.filename}`, t('skills.readyExecute')]);
     setCompilerState('idle');
-  }, [activeModule]);
+  }, [activeModule, t]);
 
   // Scroll terminal logs without affecting window scroll position
   useEffect(() => {
@@ -281,17 +298,17 @@ export default function Skills() {
 
     setTimeout(() => {
       setCompilerState('running');
-      setConsoleHistory((prev) => [...prev, '✔ Parsing AST code nodes...', '✔ Checking type annotations...', '✔ Executing build pipeline...']);
+      setConsoleHistory((prev) => [...prev, t('skills.parsingAst'), t('skills.checkingTypes'), t('skills.executingBuild')]);
       
       setTimeout(() => {
         setCompilerState('done');
         setConsoleHistory((prev) => [
           ...prev,
-          'Build output generated successfully.',
+          t('skills.buildSuccess'),
           '---------- stdout ----------',
           ...activeModule.logs,
           '----------------------------',
-          'Process exited with status code 0 (success).'
+          t('skills.processExited')
         ]);
       }, 1200);
 
@@ -313,13 +330,13 @@ export default function Skills() {
           className="opacity-0 [&.in-view]:animate-fade-up mb-12"
         >
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 dark:bg-primary-950/40 border border-primary-100 dark:border-primary-900 text-primary-600 dark:text-primary-400 text-xs font-semibold uppercase tracking-widest mb-4">
-            Skill Core
+            {t('skills.sectionTitle')}
           </div>
-          <h2 className="section-heading text-surface-900 dark:text-white flex items-center gap-2">
-            [SYSTEM DIAGNOSTICS & MODULES]
+          <h2 className="section-heading text-surface-900 dark:text-white flex items-center gap-2 font-mono">
+            {t('skills.headingDiagnostics')}
           </h2>
           <p className="section-subheading">
-            An engineering index of technical capabilities, diagnostic code blocks, and deployment profiles.
+            {t('skills.subtitle')}
           </p>
         </div>
 
@@ -328,8 +345,8 @@ export default function Skills() {
           
           {/* LEFT: Folder Tree */}
           <div className="flex flex-col gap-2.5">
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold ml-1">
-              Select Subsystem Module
+            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold ml-1 font-mono">
+              {t('skills.selectModule')}
             </span>
             <div className="grid sm:grid-cols-2 lg:grid-cols-1 gap-2">
               {SKILL_MODULES.map((module) => {
@@ -346,7 +363,7 @@ export default function Skills() {
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full transition-colors ${isActive ? 'bg-indigo-400 animate-pulse' : 'bg-slate-300 dark:bg-slate-700'}`} />
-                      <span className="text-xs font-bold font-mono">{module.category}</span>
+                      <span className="text-xs font-bold font-mono">{getCategoryTranslation(module.category)}</span>
                     </div>
                     <span className="text-[10px] font-mono opacity-50 select-none">
                       {module.filename.substring(module.filename.lastIndexOf('.'))}
@@ -391,15 +408,15 @@ export default function Skills() {
                 {compilerState === 'idle' && (
                   <>
                     <Play size={11} fill="currentColor" />
-                    COMPILE & EXECUTE
+                    {t('skills.compileButton')}
                   </>
                 )}
-                {compilerState === 'compiling' && 'PARSING CODE...'}
-                {compilerState === 'running' && 'RUNNING EXECUTION...'}
+                {compilerState === 'compiling' && t('skills.parsingCode')}
+                {compilerState === 'running' && t('skills.runningExecution')}
                 {compilerState === 'done' && (
                   <>
                     <CheckCircle size={12} className="text-emerald-400" />
-                    BUILD COMPLETED
+                    {t('skills.buildCompleted')}
                   </>
                 )}
               </button>
@@ -417,11 +434,11 @@ export default function Skills() {
               <div className="flex items-center justify-between text-slate-500 mb-3 border-b border-white/[0.04] pb-1.5 select-none">
                 <div className="flex items-center gap-1.5">
                   <Terminal size={12} className="text-indigo-400" />
-                  <span>OUTPUT STREAM / DIAGNOSTICS</span>
+                  <span>{t('skills.outputStreamTitle')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles size={12} className="text-amber-400 animate-pulse" />
-                  <span>status: {compilerState}</span>
+                  <span>{t('skills.statusLabel')}: {compilerState}</span>
                 </div>
               </div>
               <div className="h-[100px] overflow-y-auto space-y-1 font-mono text-[11px] sm:text-xs scrollbar-thin text-slate-400">
@@ -443,7 +460,7 @@ export default function Skills() {
             {/* Technology pill index */}
             <div className="px-5 py-3 border-t border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-slate-950/60 rounded-b-2xl select-none text-[11px]">
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 font-bold uppercase font-mono">Module skills:</span>
+                <span className="text-slate-400 font-bold uppercase font-mono">{t('skills.moduleSkillsLabel')}</span>
                 <div className="flex flex-wrap gap-1">
                   {activeModule.skills.map((s) => (
                     <span key={s} className="px-2 py-0.5 rounded bg-slate-200 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-white/[0.08] font-mono">
