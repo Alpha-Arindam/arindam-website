@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { en } from './en';
 import { bn } from './bn';
 import { hi } from './hi';
@@ -15,15 +15,72 @@ interface I18nContextProps {
 
 const I18nContext = createContext<I18nContextProps | undefined>(undefined);
 
+// Helper to get language from the URL (query param or path prefix)
+export const getLanguageFromUrl = (): Language | null => {
+  if (typeof window !== 'undefined') {
+    // 1. Check query parameter (e.g. ?lang=bn)
+    const params = new URLSearchParams(window.location.search);
+    const langParam = params.get('lang');
+    if (langParam === 'en' || langParam === 'bn' || langParam === 'hi') {
+      return langParam as Language;
+    }
+
+    // 2. Check path prefix (e.g. /bn, /hi, /en)
+    const pathname = window.location.pathname;
+    const match = pathname.match(/^\/(en|bn|hi)(?:\/|$)/);
+    if (match) {
+      return match[1] as Language;
+    }
+  }
+  return null;
+};
+
+// Helper to update the URL language (path prefix or query param)
+export const updateUrlLanguage = (lang: Language) => {
+  if (typeof window !== 'undefined') {
+    try {
+      const pathname = window.location.pathname;
+      const match = pathname.match(/^\/(en|bn|hi)(?:\/|$)/);
+      
+      if (match) {
+        const prefix = match[1];
+        if (prefix !== lang) {
+          const newPathname = pathname.replace(/^\/(en|bn|hi)/, `/${lang}`);
+          window.history.pushState({}, '', `${newPathname}${window.location.search}${window.location.hash}`);
+        }
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('lang') !== lang) {
+          params.set('lang', lang);
+          const newSearch = params.toString();
+          window.history.pushState({}, '', `${window.location.pathname}?${newSearch}${window.location.hash}`);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to update URL history:', e);
+    }
+  }
+};
+
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
+    // 1. Check URL first for URL-based language strategy
+    const urlLang = getLanguageFromUrl();
+    if (urlLang) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('language', urlLang);
+      }
+      return urlLang;
+    }
+
+    // 2. Check localStorage
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('language');
       if (saved === 'en' || saved === 'bn' || saved === 'hi') {
         return saved as Language;
       }
       
-      // Auto-detect browser/system language on first load
+      // 3. Auto-detect browser/system language on first load
       const browserLang = navigator.language || (navigator as any).userLanguage || '';
       const baseLang = browserLang.split('-')[0];
       if (baseLang === 'bn') return 'bn';
@@ -32,11 +89,32 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return 'en'; // default fallback
   });
 
+  useEffect(() => {
+    // Ensure URL matches current language state on initial load if not set
+    const urlLang = getLanguageFromUrl();
+    if (!urlLang) {
+      updateUrlLanguage(language);
+    }
+
+    // Listen for back/forward navigation popstate events
+    const handlePopState = () => {
+      const currentUrlLang = getLanguageFromUrl();
+      if (currentUrlLang && currentUrlLang !== language) {
+        setLanguageState(currentUrlLang);
+        localStorage.setItem('language', currentUrlLang);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [language]);
+
   const changeLanguage = (lang: Language) => {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
       localStorage.setItem('language', lang);
     }
+    updateUrlLanguage(lang);
   };
 
   const t = (key: string, variables?: Record<string, string | number>): string => {

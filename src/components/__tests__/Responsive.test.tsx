@@ -26,8 +26,8 @@ describe('Responsive Layout Components', () => {
       </I18nProvider>
     );
 
-    // Desktop: navigation links should be rendered and visible
-    const aboutLink = screen.getAllByRole('link', { name: /About/i })[0];
+    // Desktop: navigation links (buttons) should be rendered and visible
+    const aboutLink = screen.getAllByRole('button', { name: /About/i })[0];
     expect(aboutLink).toBeInTheDocument();
 
     // Mobile menu button should be styled as hidden on desktop/medium up (md:hidden)
@@ -59,8 +59,8 @@ describe('Responsive Layout Components', () => {
       
       // Check if navigation links inside mobile menu are visible
       // They should be rendered under mobile menu layout
-      const mobileNavLinks = screen.getAllByRole('link');
-      // The links should have been rendered.
+      const mobileNavLinks = screen.getAllByRole('button');
+      // The links/buttons should have been rendered.
       expect(mobileNavLinks.length).toBeGreaterThan(0);
     }
   });
