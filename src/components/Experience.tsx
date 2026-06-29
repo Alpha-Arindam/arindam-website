@@ -12,7 +12,7 @@ interface RoleHighlight {
 }
 
 export default function Experience() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
   const headingRef = useInView({ threshold: 0.1 });
   const cardRef = useInView({ threshold: 0.05 });
 
@@ -142,7 +142,7 @@ export default function Experience() {
     } else {
       setActiveRole(deploymentRoles[0]);
     }
-  }, [t]);
+  }, [language]);
 
   return (
     <section id="experience" className="py-24 bg-white dark:bg-surface-900 relative">
@@ -195,11 +195,11 @@ export default function Experience() {
                 </h3>
                 {/* Role Switcher tabs */}
                 <div className="flex gap-2 mt-4 select-none flex-wrap">
-                  {deploymentRoles.map((role) => {
+                  {deploymentRoles.map((role, idx) => {
                     const isActive = activeRole.radarPoints === role.radarPoints;
                     return (
                       <button
-                        key={role.title}
+                        key={idx}
                         onClick={() => setActiveRole(role)}
                         className={`px-3 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all ${
                           isActive

@@ -113,7 +113,7 @@ export default function About() {
               const cardRef = useInView({ threshold: 0.1 });
               return (
                 <div
-                  key={item.title}
+                  key={i}
                   ref={cardRef as React.RefObject<HTMLDivElement>}
                   className="card opacity-0 [&.in-view]:animate-scale-in p-5 group"
                   style={{ animationDelay: `${i * 100}ms`, animationFillMode: 'forwards' }}

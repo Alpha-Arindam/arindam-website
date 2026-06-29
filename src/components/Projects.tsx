@@ -144,7 +144,7 @@ export default function Projects() {
             const accentClasses = ACCENT_CLASSES[project.accent];
             return (
               <div
-                key={project.title}
+                key={i}
                 ref={cardRef as React.RefObject<HTMLDivElement>}
                 className={`card opacity-0 [&.in-view]:animate-fade-up flex flex-col border-t-2 ${accentClasses.border} hover:-translate-y-1`}
                 style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'forwards' }}
@@ -192,11 +192,11 @@ export default function Projects() {
 
         {/* Impact summary */}
         <div className="mt-14 grid sm:grid-cols-3 gap-5">
-          {impactSummary.map((item) => {
+          {impactSummary.map((item, i) => {
             const ref = useInView({ threshold: 0.1 });
             return (
               <div
-                key={item.label}
+                key={i}
                 ref={ref as React.RefObject<HTMLDivElement>}
                 className="card opacity-0 [&.in-view]:animate-scale-in p-6 text-center"
                 style={{ animationFillMode: 'forwards' }}
