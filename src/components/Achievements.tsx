@@ -69,7 +69,7 @@ export default function Achievements() {
             const cardRef = useInView({ threshold: 0.05 });
             return (
               <div
-                key={item.title}
+                key={i}
                 ref={cardRef as React.RefObject<HTMLDivElement>}
                 className="card opacity-0 [&.in-view]:animate-fade-up p-6 group hover:-translate-y-1 relative"
                 style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'forwards' }}
