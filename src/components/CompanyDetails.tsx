@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect } from 'react';
 import { ArrowLeft, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
 import { useI18n } from '../locales';

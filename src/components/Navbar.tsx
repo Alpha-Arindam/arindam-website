@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { Menu, X, Moon, Sun, Linkedin } from 'lucide-react';
 import { useI18n } from '../locales';

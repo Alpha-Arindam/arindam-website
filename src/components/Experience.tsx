@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useInView } from '../hooks/useInView';
 import { Calendar, MapPin, ChevronRight, Briefcase } from 'lucide-react';

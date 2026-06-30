@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { en } from './en';
 import { bn } from './bn';
@@ -63,33 +65,41 @@ export const updateUrlLanguage = (lang: Language) => {
 };
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>(() => {
+  const [language, setLanguageState] = useState<Language>('en');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
     // 1. Check URL first for URL-based language strategy
     const urlLang = getLanguageFromUrl();
     if (urlLang) {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('language', urlLang);
-      }
-      return urlLang;
+      setLanguageState(urlLang);
+      localStorage.setItem('language', urlLang);
+      return;
     }
 
     // 2. Check localStorage
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('language');
-      if (saved === 'en' || saved === 'bn' || saved === 'hi') {
-        return saved as Language;
-      }
-      
-      // 3. Auto-detect browser/system language on first load
-      const browserLang = navigator.language || (navigator as any).userLanguage || '';
-      const baseLang = browserLang.split('-')[0];
-      if (baseLang === 'bn') return 'bn';
-      if (baseLang === 'hi') return 'hi';
+    const saved = localStorage.getItem('language');
+    if (saved === 'en' || saved === 'bn' || saved === 'hi') {
+      setLanguageState(saved as Language);
+      return;
     }
-    return 'en'; // default fallback
-  });
+    
+    // 3. Auto-detect browser/system language on first load
+    const browserLang = navigator.language || (navigator as any).userLanguage || '';
+    const baseLang = browserLang.split('-')[0];
+    if (baseLang === 'bn') {
+      setLanguageState('bn');
+      localStorage.setItem('language', 'bn');
+    } else if (baseLang === 'hi') {
+      setLanguageState('hi');
+      localStorage.setItem('language', 'hi');
+    }
+  }, []);
 
   useEffect(() => {
+    if (!mounted) return;
+
     // Ensure URL matches current language state on initial load if not set
     const urlLang = getLanguageFromUrl();
     if (!urlLang) {
@@ -107,7 +117,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [language]);
+  }, [language, mounted]);
 
   const changeLanguage = (lang: Language) => {
     setLanguageState(lang);

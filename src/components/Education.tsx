@@ -1,3 +1,5 @@
+'use client';
+
 import { useInView } from '../hooks/useInView';
 import { GraduationCap, Calendar, MapPin } from 'lucide-react';
 import { useI18n } from '../locales';

@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, FormEvent, useEffect } from 'react';
 import { useInView } from '../hooks/useInView';
 import { Mail, Linkedin, MapPin, Send, CheckCircle, XCircle, Loader, Terminal, Users, UserCheck } from 'lucide-react';

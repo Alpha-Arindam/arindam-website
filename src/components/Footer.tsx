@@ -1,3 +1,5 @@
+'use client';
+
 import { Linkedin, Mail, Heart } from 'lucide-react';
 import { useI18n } from '../locales';
 import { handleLinkedInClick } from '../utils/linkedin';

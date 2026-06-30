@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import { useInView } from '../hooks/useInView';
 import { Code2, Play, CheckCircle, Terminal, Sparkles } from 'lucide-react';
